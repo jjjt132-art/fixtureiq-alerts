@@ -1,0 +1,27 @@
+name: Match alerts
+
+on:
+  # Every 5 minutes (GitHub's shortest schedule; runs can start a few minutes late)
+  schedule:
+    - cron: '*/5 * * * *'
+  # Lets you run it by hand from the Actions tab
+  workflow_dispatch:
+
+# Never run two at once (stops duplicate alerts if one run is slow)
+concurrency:
+  group: match-alerts
+  cancel-in-progress: false
+
+jobs:
+  alerts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Check scores and send alerts
+        run: node send-alerts.js
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
